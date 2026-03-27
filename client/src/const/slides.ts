@@ -21,22 +21,23 @@ export const slides: Slide[] = [
     title: '開発中のWebアプリ：ヨルミチ',
     content: `
       <div class="space-y-4">
-        <p class="font-semibold text-lg">こういうアプリを開発してます！</p>
+        <p class="font-semibold text-lg text-blue-700">Googleマップ（最短経路）との違い</p>
+        <p class="text-sm font-medium">ヨルミチは「最短距離」ではなく、「一番明るくて安全な道」を通って目的地へ着くことをゴールとしています！</p>
         <ul class="space-y-3">
           <li class="flex gap-3">
-            <span class="font-bold">✓</span>
-            <span>街灯の数や人通りをリアルタイムで解析</span>
+            <span class="font-bold text-blue-600">✓</span>
+            <span>街灯の明るさや人通りをリアルタイム解析</span>
           </li>
           <li class="flex gap-3">
-            <span class="font-bold">✓</span>
-            <span>暗い道や死角を避けた最安全ルートを提案</span>
+            <span class="font-bold text-blue-600">✓</span>
+            <span>暗い道や死角を避けた「最安全ルート」を提案</span>
           </li>
           <li class="flex gap-3">
-            <span class="font-bold">✓</span>
-            <span>AIが「一番安全な帰り道」を案内</span>
+            <span class="font-bold text-blue-600">✓</span>
+            <span>AIが毎日の安心な帰り道をナビゲート</span>
           </li>
         </ul>
-        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅をサポートするスマートナビゲーション</p>
+        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅を最優先するスマートナビゲーション</p>
       </div>
     `,
     type: 'content',
@@ -48,29 +49,27 @@ export const slides: Slide[] = [
     content: `
       <div class="space-y-4">
         <h3 class="font-bold text-lg">ヨルミチ・デバイス（エアタグサイズ）</h3>
-        <p class="text-sm text-gray-700 mb-3">カバンに入れるだけで、あなたを守ります。</p>
+        <p class="text-sm font-bold text-blue-700 bg-blue-50 p-2 rounded">
+          【主観的】な不安を、【客観的】な事実にできるんです！
+        </p>
         <div class="bg-gray-50 p-4 rounded">
-          <p class="mb-3 font-semibold text-black">デバイスの特徴</p>
-          <ul class="space-y-2 text-sm">
+          <p class="mb-3 font-semibold text-black">具体的な使用例</p>
+          <ul class="space-y-3 text-sm">
             <li class="flex gap-2">
-              <span>•</span>
-              <span><strong>小型・軽量</strong>：エアタグのようなコンパクトサイズ</span>
+              <span class="font-bold text-red-500">①</span>
+              <span><strong>警察への提出</strong>：つきまとい被害に遭ったときの「客観的な証拠」として提出</span>
             </li>
             <li class="flex gap-2">
-              <span>•</span>
-              <span><strong>自動検知</strong>：付近に同じデバイスが継続して存在するかをスキャン</span>
+              <span class="font-bold text-green-600">②</span>
+              <span><strong>学校への提出</strong>：いじめ被害に遭ったときの「事実証明」として提出</span>
             </li>
-            <li class="flex gap-2">
-              <span>•</span>
-              <span><strong>証拠生成</strong>：警察に提出可能な客観的なログを自動生成</span>
-            </li>
-            <li class="flex gap-2">
-              <span>•</span>
-              <span><strong>自動録音</strong>：非常時に周囲の状況を記録</span>
+            <li class="flex gap-2 pt-2 border-t border-gray-200 mt-2">
+              <span class="text-gray-500">•</span>
+              <span class="text-gray-600">デバイスが周囲の状況を自動スキャン＆録音し、言い逃れできない証拠を生成します</span>
             </li>
           </ul>
         </div>
-        <p class="text-sm italic text-gray-600">つきまとい被害から身を守るための最新テクノロジー</p>
+        <p class="text-sm italic text-gray-600">カバンに入れるだけで、万が一のときの強力なお守りに</p>
       </div>
     `,
     type: 'content',
