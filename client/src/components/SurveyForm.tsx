@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 
 interface SurveyResponse {
@@ -26,29 +25,6 @@ export default function SurveyForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-
-  const submitSurvey = trpc.survey.submit.useMutation({
-    onSuccess: () => {
-      setSubmitted(true);
-      toast.success('アンケートを送信しました！ご協力ありがとうございます。');
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setFormData({
-          q1_use_app: 'yes',
-          q2_why_app: '',
-          q3_use_device: 'yes',
-          q4_why_device: '',
-          q5_price: '',
-          q6_coupon_map: '',
-        });
-        setSubmitted(false);
-      }, 3000);
-    },
-    onError: (error) => {
-      toast.error('送信に失敗しました。もう一度お試しください。');
-      console.error('Survey submission error:', error);
-    },
-  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -83,11 +59,33 @@ export default function SurveyForm() {
 
     setIsSubmitting(true);
     try {
-      await submitSurvey.mutateAsync(formData);
+      const res = await fetch('/api/survey', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('Server error');
+      setSubmitted(true);
+      toast.success('アンケートを送信しました！ご協力ありがとうございます。');
+      setTimeout(() => {
+        setFormData({
+          q1_use_app: 'yes',
+          q2_why_app: '',
+          q3_use_device: 'yes',
+          q4_why_device: '',
+          q5_price: '',
+          q6_coupon_map: '',
+        });
+        setSubmitted(false);
+      }, 3000);
+    } catch (error) {
+      toast.error('送信に失敗しました。もう一度お試しください。');
+      console.error('Survey submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   if (submitted) {
     return (
