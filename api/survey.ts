@@ -49,12 +49,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await transporter.sendMail({
         from: `"YORUMICHI Survey" <${smtpUser}>`,
-        to: 'alisslab.jp@gmail.com',
+        to: 'alisslabs.jp@gmail.com',
         subject: 'ヨルミチ ニーズ調査 - アンケート回答',
         text: emailText,
       });
 
-      console.log('✅ Email sent successfully to alisslab.jp@gmail.com');
+      console.log('✅ Email sent successfully to alisslabs.jp@gmail.com');
     } catch (err) {
       console.error('❌ Email send failed:', err);
     }
