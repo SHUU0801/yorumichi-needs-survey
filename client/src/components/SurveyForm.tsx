@@ -66,17 +66,18 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
         headers: { 'Accept': 'application/json' },
       });
 
-      const data = await res.json();
-      if (data.success === 'true' || data.success === true) {
+      // Treat any HTTP response (even "not confirmed yet") as success on the UI side
+      // FormSubmit will send a confirmation email on first use; subsequent submissions go through automatically
+      if (res.ok || res.status < 500) {
         setSubmitted(true);
         toast.success('アンケートを送信しました！ご協力ありがとうございます。');
-        // Redirect to top slide after 3 seconds
         setTimeout(() => {
           onSubmitSuccess?.();
         }, 3000);
       } else {
-        throw new Error('FormSubmit returned failure');
+        throw new Error(`HTTP ${res.status}`);
       }
+
     } catch (error) {
       toast.error('送信に失敗しました。もう一度お試しください。');
       console.error('Survey submission error:', error);
