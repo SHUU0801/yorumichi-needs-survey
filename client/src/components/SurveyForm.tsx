@@ -9,6 +9,8 @@ interface Props {
 }
 
 interface SurveyResponse {
+  generation: string;
+  gender: string;
   q1_use_app: 'yes' | 'no';
   q2_why_app: string;
   q3_use_device: 'yes' | 'no';
@@ -19,6 +21,8 @@ interface SurveyResponse {
 
 export default function SurveyForm({ onSubmitSuccess }: Props) {
   const [formData, setFormData] = useState<SurveyResponse>({
+    generation: '',
+    gender: '',
     q1_use_app: 'yes',
     q2_why_app: '',
     q3_use_device: 'yes',
@@ -40,6 +44,8 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.generation) { toast.error('年代を選択してください'); return; }
+    if (!formData.gender) { toast.error('性別を選択してください'); return; }
     if (!formData.q2_why_app.trim()) { toast.error('質問2の回答を入力してください'); return; }
     if (!formData.q4_why_device.trim()) { toast.error('質問4の回答を入力してください'); return; }
     if (!formData.q5_price.trim()) { toast.error('質問5の回答を入力してください'); return; }
@@ -83,6 +89,44 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* 属性情報 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
+        {/* 年代 */}
+        <div className="space-y-2">
+          <label className="block font-semibold text-black text-sm">年代 <span className="text-red-500">*</span></label>
+          <select 
+            name="generation" 
+            value={formData.generation} 
+            onChange={handleChange}
+            className="w-full flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">選択してください</option>
+            <option value="10代">10代</option>
+            <option value="20代">20代</option>
+            <option value="30代">30代</option>
+            <option value="40代">40代</option>
+            <option value="50代">50代</option>
+            <option value="60代以上">60代以上</option>
+          </select>
+        </div>
+
+        {/* 性別 */}
+        <div className="space-y-2">
+          <label className="block font-semibold text-black text-sm">性別 <span className="text-red-500">*</span></label>
+          <select 
+            name="gender" 
+            value={formData.gender} 
+            onChange={handleChange}
+            className="w-full flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">選択してください</option>
+            <option value="男性">男性</option>
+            <option value="女性">女性</option>
+            <option value="その他・回答しない">その他・回答しない</option>
+          </select>
+        </div>
+      </div>
+
       {/* Q1 */}
       <div className="space-y-3">
         <label className="block font-semibold text-black">1. このアプリを使いたいですか？</label>

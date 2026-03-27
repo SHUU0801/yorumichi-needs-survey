@@ -2,6 +2,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import nodemailer from 'nodemailer';
 
 interface SurveyInput {
+  generation: string;
+  gender: string;
   q1_use_app: 'yes' | 'no';
   q2_why_app: string;
   q3_use_device: 'yes' | 'no';
@@ -21,6 +23,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const emailText = `
 ヨルミチ ニーズ調査 - アンケート回答
 =====================================
+【回答者属性】
+年代: ${data.generation}
+性別: ${data.gender}
+-------------------------------------
 質問1（アプリを使いたいですか）: ${data.q1_use_app === 'yes' ? 'はい' : 'いいえ'}
 質問2（それはなぜですか）: ${data.q2_why_app}
 質問3（デバイスを使いたいですか）: ${data.q3_use_device === 'yes' ? 'はい' : 'いいえ'}
