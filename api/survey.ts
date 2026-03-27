@@ -59,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 年齢: ${data.age}
 ストーカー被害の経験: ${data.stalker_exp}
 -------------------------------------
-質問1（アプリを使いたいですか）: ${data.q1_use_app === 'yes' ? 'はい' : 'いいえ'}
+質問1（夜間のルート検索にヨルミチを使いたいか）: ${data.q1_use_app === 'yes' ? 'はい' : 'いいえ'}
 質問2（それはなぜですか）: ${data.q2_why_app}
 質問3（デバイスを使いたいですか）: ${data.q3_use_device === 'yes' ? 'はい' : 'いいえ'}
 質問4（それはなぜですか）: ${data.q4_why_device}

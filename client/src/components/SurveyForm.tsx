@@ -137,7 +137,7 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
       </div>
 
       <div className="space-y-3">
-        <label className="block font-semibold text-black">このヨルミチアプリを使ってみたいですか？ <span className="text-red-500">*</span></label>
+        <label className="block font-semibold text-black">夜間のルート検索をするときにgooglemapではなくヨルミチを使いたいと思いますか？ <span className="text-red-500">*</span></label>
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="q1_use_app" value="yes" checked={formData.q1_use_app === 'yes'} onChange={handleChange} className="w-4 h-4" />

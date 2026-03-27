@@ -37,7 +37,9 @@ export const slides: Slide[] = [
             <span>AIが毎日の安心な帰り道をナビゲート</span>
           </li>
         </ul>
-        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅を最優先するスマートナビゲーション</p>
+        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p class="text-sm font-bold text-yellow-800 text-center">✨ 今年中にアプリ化を予定しています！ ✨</p>
+        </div>
       </div>
     `,
     type: 'content',
@@ -80,9 +82,10 @@ export const slides: Slide[] = [
     title: 'クーポン連動マップ：安全と特典の両立',
     content: `
       <div class="space-y-4">
-        <p class="font-semibold text-lg">ヨルミチアプリを使ってくれた人に、クーポンを配布します！</p>
+        <p class="font-semibold text-lg text-blue-700">クーポン連動も計画中です！</p>
+        <p class="text-sm text-gray-700">安全な道を歩くことで、地域のお店から特典をもらえる仕組みを予定しています。</p>
         <div class="bg-gray-50 p-4 rounded mt-3">
-          <p class="mb-3 font-semibold text-black">クーポンの仕組み</p>
+          <p class="mb-3 font-semibold text-black">想定しているクーポンの仕組み</p>
           <ul class="space-y-2 text-sm">
             <li class="flex gap-2">
               <span>•</span>
@@ -98,7 +101,7 @@ export const slides: Slide[] = [
             </li>
           </ul>
         </div>
-        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅と、お得な特典が一緒に手に入る</p>
+        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅と、お得な特典が一緒に手に入る未来へ</p>
       </div>
     `,
     type: 'content',
