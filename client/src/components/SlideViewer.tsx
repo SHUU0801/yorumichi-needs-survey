@@ -152,11 +152,12 @@ export default function SlideViewer() {
                 )}
               </div>
               <div className="max-h-80 md:max-h-96 overflow-y-auto px-2">
-                <SurveyForm />
+                <SurveyForm onSubmitSuccess={() => setCurrentSlide(0)} />
               </div>
               <p className="text-xs text-gray-400 text-center mt-3 md:mt-4">スワイプで前後のスライドに移動できます</p>
             </div>
           )}
+
         </div>
       </div>
 
