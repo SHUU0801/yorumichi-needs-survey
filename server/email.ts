@@ -1,5 +1,3 @@
-import nodemailer from "nodemailer";
-
 interface SurveyInput {
   q1_use_app: 'yes' | 'no';
   q2_why_app: string;
@@ -12,29 +10,34 @@ interface SurveyInput {
 export async function sendSurveyEmail(surveyData: SurveyInput): Promise<void> {
   const emailContent = formatSurveyEmailPlainText(surveyData);
 
-  try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
-      port: parseInt(process.env.SMTP_PORT || "465"),
-      secure: process.env.SMTP_SECURE !== "false", // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error('RESEND_API_KEY is not set');
+    throw new Error('Email configuration missing');
+  }
 
-    const info = await transporter.sendMail({
-      from: `"YORUMICHI Needs Survey" <${process.env.SMTP_USER || "noreply@yorumichi-survey.com"}>`,
-      to: 'alisslab.jp@gmail.com',
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'YORUMICHI Survey <onboarding@resend.dev>',
+      to: ['alisslab.jp@gmail.com'],
       subject: 'ヨルミチ ニーズ調査 - アンケート回答',
       text: emailContent,
-    });
+    }),
+  });
 
-    console.log('Survey email sent successfully:', info.messageId);
-  } catch (error) {
-    console.error('Error sending survey email:', error);
-    throw error;
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('Resend API error:', error);
+    throw new Error(`Failed to send email: ${error}`);
   }
+
+  const data = await response.json();
+  console.log('Survey email sent successfully:', data);
 }
 
 function formatSurveyEmailPlainText(data: SurveyInput): string {
