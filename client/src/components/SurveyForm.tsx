@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
@@ -9,8 +8,9 @@ interface Props {
 }
 
 interface SurveyResponse {
-  generation: string;
   gender: string;
+  age: string;
+  stalker_exp: string;
   q1_use_app: 'yes' | 'no';
   q2_why_app: string;
   q3_use_device: 'yes' | 'no';
@@ -21,8 +21,9 @@ interface SurveyResponse {
 
 export default function SurveyForm({ onSubmitSuccess }: Props) {
   const [formData, setFormData] = useState<SurveyResponse>({
-    generation: '',
     gender: '',
+    age: '',
+    stalker_exp: '',
     q1_use_app: 'yes',
     q2_why_app: '',
     q3_use_device: 'yes',
@@ -44,12 +45,13 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.generation) { toast.error('年代を選択してください'); return; }
     if (!formData.gender) { toast.error('性別を選択してください'); return; }
-    if (!formData.q2_why_app.trim()) { toast.error('質問2の回答を入力してください'); return; }
-    if (!formData.q4_why_device.trim()) { toast.error('質問4の回答を入力してください'); return; }
-    if (!formData.q5_price.trim()) { toast.error('質問5の回答を入力してください'); return; }
-    if (!formData.q6_coupon_map.trim()) { toast.error('質問6の回答を入力してください'); return; }
+    if (!formData.age) { toast.error('年齢を選択してください'); return; }
+    if (!formData.stalker_exp) { toast.error('ストーカー被害の経験を選択してください'); return; }
+    if (!formData.q2_why_app.trim()) { toast.error('アプリを使いたい理由を入力してください'); return; }
+    if (!formData.q4_why_device.trim()) { toast.error('デバイスを使いたい理由を入力してください'); return; }
+    if (!formData.q5_price) { toast.error('デバイスの希望価格を選択してください'); return; }
+    if (!formData.q6_coupon_map.trim()) { toast.error('クーポンマップについてのご意見を入力してください'); return; }
 
     setIsSubmitting(true);
     try {
@@ -58,14 +60,13 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-      // Always show success regardless of response - survey is logged on server
+
       setSubmitted(true);
       toast.success('アンケートを送信しました！ご協力ありがとうございます。');
       setTimeout(() => {
         onSubmitSuccess?.();
       }, 3000);
     } catch (_err) {
-      // Even on network error, show success if we got this far
       setSubmitted(true);
       toast.success('アンケートを送信しました！ご協力ありがとうございます。');
       setTimeout(() => {
@@ -89,105 +90,111 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* 属性情報 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 mb-6">
-        {/* 年代 */}
         <div className="space-y-2">
-          <label className="block font-semibold text-black text-sm">年代 <span className="text-red-500">*</span></label>
-          <select 
-            name="generation" 
-            value={formData.generation} 
-            onChange={handleChange}
-            className="w-full flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <label className="block font-semibold text-black text-sm">性別 <span className="text-red-500">*</span></label>
+          <select name="gender" value={formData.gender} onChange={handleChange} className="w-full flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
             <option value="">選択してください</option>
+            <option value="男性">男性</option>
+            <option value="女性">女性</option>
+            <option value="選択しない">選択しない</option>
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="block font-semibold text-black text-sm">年齢 <span className="text-red-500">*</span></label>
+          <select name="age" value={formData.age} onChange={handleChange} className="w-full flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <option value="">選択してください</option>
+            <option value="10歳以下">10歳以下</option>
             <option value="10代">10代</option>
             <option value="20代">20代</option>
             <option value="30代">30代</option>
             <option value="40代">40代</option>
             <option value="50代">50代</option>
-            <option value="60代以上">60代以上</option>
-          </select>
-        </div>
-
-        {/* 性別 */}
-        <div className="space-y-2">
-          <label className="block font-semibold text-black text-sm">性別 <span className="text-red-500">*</span></label>
-          <select 
-            name="gender" 
-            value={formData.gender} 
-            onChange={handleChange}
-            className="w-full flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">選択してください</option>
-            <option value="男性">男性</option>
-            <option value="女性">女性</option>
-            <option value="その他・回答しない">その他・回答しない</option>
+            <option value="60代">60代</option>
+            <option value="70代">70代</option>
+            <option value="80代以上">80代以上</option>
           </select>
         </div>
       </div>
 
-      {/* Q1 */}
       <div className="space-y-3">
-        <label className="block font-semibold text-black">1. このアプリを使いたいですか？</label>
+        <label className="block font-semibold text-black">貴方自身や周りの人が付きまとい行為（ストーカー行為）にあったことはありますか？ <span className="text-red-500">*</span></label>
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="stalker_exp" value="貴方自身がある" checked={formData.stalker_exp === '貴方自身がある'} onChange={handleChange} className="w-4 h-4" />
+            <span>貴方自身がある</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="stalker_exp" value="友人がある" checked={formData.stalker_exp === '友人がある'} onChange={handleChange} className="w-4 h-4" />
+            <span>友人がある</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="stalker_exp" value="どちらもない" checked={formData.stalker_exp === 'どちらもない'} onChange={handleChange} className="w-4 h-4" />
+            <span>どちらもない</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <label className="block font-semibold text-black">このヨルミチアプリを使ってみたいですか？ <span className="text-red-500">*</span></label>
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="q1_use_app" value="yes" checked={formData.q1_use_app === 'yes'} onChange={handleChange} className="w-4 h-4" />
-            <span>Yes</span>
+            <span>はい</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="q1_use_app" value="no" checked={formData.q1_use_app === 'no'} onChange={handleChange} className="w-4 h-4" />
-            <span>No</span>
+            <span>いいえ</span>
           </label>
         </div>
       </div>
 
-      {/* Q2 */}
       <div className="space-y-3">
-        <label className="block font-semibold text-black">2. それはなぜですか？</label>
+        <label className="block font-semibold text-black">上記のように回答したのはなぜですか？ <span className="text-red-500">*</span></label>
         <Textarea name="q2_why_app" value={formData.q2_why_app} onChange={handleChange} placeholder="理由をお聞かせください..." className="min-h-24 resize-none" />
       </div>
 
-      {/* Q3 */}
       <div className="space-y-3">
-        <label className="block font-semibold text-black">3. このデバイスを使いたいですか？</label>
+        <label className="block font-semibold text-black">このヨルミチデバイスを使いたいですか？ <span className="text-red-500">*</span></label>
         <div className="flex gap-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="q3_use_device" value="yes" checked={formData.q3_use_device === 'yes'} onChange={handleChange} className="w-4 h-4" />
-            <span>Yes</span>
+            <span>はい</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="q3_use_device" value="no" checked={formData.q3_use_device === 'no'} onChange={handleChange} className="w-4 h-4" />
-            <span>No</span>
+            <span>いいえ</span>
           </label>
         </div>
       </div>
 
-      {/* Q4 */}
       <div className="space-y-3">
-        <label className="block font-semibold text-black">4. それはなぜですか？</label>
+        <label className="block font-semibold text-black">上記のように解答したのはなぜですか？ <span className="text-red-500">*</span></label>
         <Textarea name="q4_why_device" value={formData.q4_why_device} onChange={handleChange} placeholder="理由をお聞かせください..." className="min-h-24 resize-none" />
       </div>
 
-      {/* Q5 */}
       <div className="space-y-3">
-        <label className="block font-semibold text-black">5. デバイスはいくらなら購入したいと思いますか？</label>
-        <Input type="text" name="q5_price" value={formData.q5_price} onChange={handleChange} placeholder="例: 3,000円、5,000円など" className="text-base" />
+        <label className="block font-semibold text-black">デバイスはいくらなら購入したいと思いますか？ <span className="text-red-500">*</span></label>
+        <select name="q5_price" value={formData.q5_price} onChange={handleChange} className="w-full flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+            <option value="">選択してください</option>
+            <option value="1000円以下">1000円以下</option>
+            <option value="1000~2000円以下">1000~2000円以下</option>
+            <option value="2000~3000円以下">2000~3000円以下</option>
+            <option value="3000~4000以下">3000~4000以下</option>
+            <option value="4000~5000円以下">4000~5000円以下</option>
+            <option value="5000円以上">5000円以上</option>
+        </select>
       </div>
 
-      {/* Q6 */}
       <div className="space-y-3">
-        <label className="block font-semibold text-black">6. クーポン連動マップは、帰り道を変えるきっかけになりますか？</label>
+        <label className="block font-semibold text-black">クーポン連動マップは、帰り道を変えるきっかけになりますか？ <span className="text-red-500">*</span></label>
         <Textarea name="q6_coupon_map" value={formData.q6_coupon_map} onChange={handleChange} placeholder="ご意見をお聞かせください..." className="min-h-24 resize-none" />
       </div>
 
       <Button type="submit" disabled={isSubmitting} className="w-full bg-black text-white hover:bg-gray-800 py-3 text-base font-semibold">
         {isSubmitting ? '送信中...' : 'アンケートを送信'}
       </Button>
-
-      <p className="text-xs text-gray-500 text-center">
-        ご回答ありがとうございます。いただいたご意見は、サービス改善に活用させていただきます。
-      </p>
     </form>
   );
 }
