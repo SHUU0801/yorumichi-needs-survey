@@ -151,7 +151,7 @@ export default function SlideViewer() {
                   <p className="text-sm sm:text-base md:text-lg text-gray-600 break-words">{slide.subtitle}</p>
                 )}
               </div>
-              <div className="max-h-80 md:max-h-96 overflow-y-auto px-2">
+              <div className="w-full px-2">
                 <SurveyForm onSubmitSuccess={() => setCurrentSlide(0)} />
               </div>
               <p className="text-xs text-gray-400 text-center mt-3 md:mt-4">スワイプで前後のスライドに移動できます</p>
