@@ -37,7 +37,9 @@ export const slides: Slide[] = [
             <span>AIが毎日の安心な帰り道をナビゲート</span>
           </li>
         </ul>
-        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅を最優先するスマートナビゲーション</p>
+        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p class="text-sm font-bold text-yellow-800 text-center">✨ 今年中にアプリ化を予定しています！ ✨</p>
+        </div>
       </div>
     `,
     type: 'content',
@@ -49,6 +51,9 @@ export const slides: Slide[] = [
     content: `
       <div class="space-y-4">
         <h3 class="font-bold text-lg">ヨルミチ・デバイス（エアタグサイズ）</h3>
+        <p class="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+          デバイスが周囲の状況を自動スキャン＆録音し、言い逃れできない証拠を生成します
+        </p>
         <p class="text-sm font-bold text-blue-700 bg-blue-50 p-2 rounded">
           【主観的】な不安を、【客観的】な事実にできるんです！
         </p>
@@ -57,15 +62,11 @@ export const slides: Slide[] = [
           <ul class="space-y-3 text-sm">
             <li class="flex gap-2">
               <span class="font-bold text-red-500">①</span>
-              <span><strong>警察への提出</strong>：つきまとい被害に遭ったときの「客観的な証拠」として提出</span>
+              <span><strong>警察への提出</strong>：つきまとい被害に遭ったとき、客観的な証拠を提出できるようにし、警察が動かないということや泣き寝入りをなくす</span>
             </li>
             <li class="flex gap-2">
               <span class="font-bold text-green-600">②</span>
-              <span><strong>学校への提出</strong>：いじめ被害に遭ったときの「事実証明」として提出</span>
-            </li>
-            <li class="flex gap-2 pt-2 border-t border-gray-200 mt-2">
-              <span class="text-gray-500">•</span>
-              <span class="text-gray-600">デバイスが周囲の状況を自動スキャン＆録音し、言い逃れできない証拠を生成します</span>
+              <span><strong>学校への提出</strong>：いじめ被害があったことについて、学校側が動かざるを得ないくらいの客観的な証拠を提出できるようにする</span>
             </li>
           </ul>
         </div>
@@ -80,9 +81,10 @@ export const slides: Slide[] = [
     title: 'クーポン連動マップ：安全と特典の両立',
     content: `
       <div class="space-y-4">
-        <p class="font-semibold text-lg">ヨルミチアプリを使ってくれた人に、クーポンを配布します！</p>
+        <p class="font-semibold text-lg text-blue-700">クーポン連動も計画中です！</p>
+        <p class="text-sm text-gray-700">安全な道を歩くことで、地域のお店から特典をもらえる仕組みを予定しています。</p>
         <div class="bg-gray-50 p-4 rounded mt-3">
-          <p class="mb-3 font-semibold text-black">クーポンの仕組み</p>
+          <p class="mb-3 font-semibold text-black">想定しているクーポンの仕組み</p>
           <ul class="space-y-2 text-sm">
             <li class="flex gap-2">
               <span>•</span>
@@ -98,7 +100,7 @@ export const slides: Slide[] = [
             </li>
           </ul>
         </div>
-        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅と、お得な特典が一緒に手に入る</p>
+        <p class="text-sm italic text-gray-600 mt-4">安全な帰宅と、お得な特典が一緒に手に入る未来へ</p>
       </div>
     `,
     type: 'content',

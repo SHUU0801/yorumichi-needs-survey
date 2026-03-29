@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { surveyHandler } from "../server/surveyHandlers";
+import { surveyExportHandler } from "../server/surveyHandlers";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  return surveyHandler(req, res);
+  return surveyExportHandler(req, res);
 }

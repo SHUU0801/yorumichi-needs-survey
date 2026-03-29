@@ -137,8 +137,8 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
       </div>
 
       <div className="space-y-3">
-        <label className="block font-semibold text-black">このヨルミチアプリを使ってみたいですか？ <span className="text-red-500">*</span></label>
-        <div className="flex gap-4">
+        <label className="block font-semibold text-black">夜間のルート検索をするときにgooglemapではなくヨルミチを使いたいと思いますか？ <span className="text-red-500">*</span></label>
+        <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="q1_use_app" value="yes" checked={formData.q1_use_app === 'yes'} onChange={handleChange} className="w-4 h-4" />
             <span>はい</span>
@@ -157,7 +157,7 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
 
       <div className="space-y-3">
         <label className="block font-semibold text-black">このヨルミチデバイスを使いたいですか？ <span className="text-red-500">*</span></label>
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="radio" name="q3_use_device" value="yes" checked={formData.q3_use_device === 'yes'} onChange={handleChange} className="w-4 h-4" />
             <span>はい</span>
@@ -191,6 +191,10 @@ export default function SurveyForm({ onSubmitSuccess }: Props) {
         <label className="block font-semibold text-black">クーポン連動マップは、帰り道を変えるきっかけになりますか？ <span className="text-red-500">*</span></label>
         <Textarea name="q6_coupon_map" value={formData.q6_coupon_map} onChange={handleChange} placeholder="ご意見をお聞かせください..." className="min-h-24 resize-none" />
       </div>
+
+      <p className="text-xs leading-5 text-gray-500">
+        送信時には、回答内容に加えてアクセス元の推定地域情報（国・地域・市区町村・緯度経度）が集計目的で保存されます。
+      </p>
 
       <Button type="submit" disabled={isSubmitting} className="w-full bg-black text-white hover:bg-gray-800 py-3 text-base font-semibold">
         {isSubmitting ? '送信中...' : 'アンケートを送信'}
