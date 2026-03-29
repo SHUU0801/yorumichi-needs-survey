@@ -1,4 +1,5 @@
 import type { Request, Response, Express } from "express";
+import { Storage } from "@google-cloud/storage";
 import { randomUUID } from "crypto";
 import { mkdir, readFile, stat, writeFile } from "fs/promises";
 import nodemailer from "nodemailer";
@@ -45,6 +46,7 @@ type SurveyFieldConfig = {
 type StoredSurveyResponse = SurveyInput & {
   id: string;
   submittedAt: string;
+  clientIp: string | null;
   geo: {
     country: string | null;
     region: string | null;
@@ -58,6 +60,8 @@ const GOOGLE_FORM_URL =
   process.env.GOOGLE_FORM_URL ??
   "https://docs.google.com/forms/d/e/1FAIpQLSf0RF7AwjT0Oz2945cNYuo6MBXOEgIu8ACaUaCHlxSoPH6bzw/formResponse";
 
+const storage = new Storage();
+
 const SURVEY_CSV_HEADERS = [
   "id",
   "submittedAt",
@@ -70,6 +74,7 @@ const SURVEY_CSV_HEADERS = [
   "q4_why_device",
   "q5_price",
   "q6_coupon_map",
+  "clientIp",
   "country",
   "region",
   "city",
@@ -146,7 +151,12 @@ function buildGoogleFormPayload(data: SurveyInput): URLSearchParams {
   return formPayload;
 }
 
-function buildSurveyEmailText(data: SurveyInput, timestamp: string, geo: StoredSurveyResponse["geo"]): string {
+function buildSurveyEmailText(
+  data: SurveyInput,
+  timestamp: string,
+  clientIp: string | null,
+  geo: StoredSurveyResponse["geo"]
+): string {
   const orderedKeys: SurveyFieldKey[] = [
     "gender",
     "age",
@@ -169,6 +179,7 @@ function buildSurveyEmailText(data: SurveyInput, timestamp: string, geo: StoredS
   lines.push(`推定市区町村: ${geo.city ?? ""}`);
   lines.push(`推定緯度: ${geo.latitude ?? ""}`);
   lines.push(`推定経度: ${geo.longitude ?? ""}`);
+  lines.push(`client_ip: ${clientIp ?? ""}`);
 
   return `
 ヨルミチ ニーズ調査 - アンケート回答
@@ -181,12 +192,35 @@ ${lines.join("\n")}
 
 function getGeoFromRequest(req: RequestLike): StoredSurveyResponse["geo"] {
   return {
-    country: getHeaderValue(req, "x-vercel-ip-country"),
-    region: getHeaderValue(req, "x-vercel-ip-country-region"),
-    city: getHeaderValue(req, "x-vercel-ip-city"),
-    latitude: getHeaderValue(req, "x-vercel-ip-latitude"),
-    longitude: getHeaderValue(req, "x-vercel-ip-longitude"),
+    country:
+      getHeaderValue(req, "x-vercel-ip-country") ??
+      getHeaderValue(req, "x-appengine-country") ??
+      getHeaderValue(req, "x-client-geo-country"),
+    region:
+      getHeaderValue(req, "x-vercel-ip-country-region") ??
+      getHeaderValue(req, "x-appengine-region") ??
+      getHeaderValue(req, "x-client-geo-region"),
+    city:
+      getHeaderValue(req, "x-vercel-ip-city") ??
+      getHeaderValue(req, "x-appengine-city") ??
+      getHeaderValue(req, "x-client-geo-city"),
+    latitude:
+      getHeaderValue(req, "x-vercel-ip-latitude") ??
+      getHeaderValue(req, "x-client-geo-latitude"),
+    longitude:
+      getHeaderValue(req, "x-vercel-ip-longitude") ??
+      getHeaderValue(req, "x-client-geo-longitude"),
   };
+}
+
+function getClientIp(req: RequestLike): string | null {
+  const forwardedFor = getHeaderValue(req, "x-forwarded-for");
+  if (forwardedFor) {
+    const [firstIp] = forwardedFor.split(",");
+    return firstIp?.trim() || null;
+  }
+
+  return req.socket?.remoteAddress ?? null;
 }
 
 function getSurveyCsvPath() {
@@ -214,6 +248,7 @@ function toSurveyCsvRow(row: StoredSurveyResponse): string {
     row.q4_why_device,
     row.q5_price,
     row.q6_coupon_map,
+    row.clientIp,
     row.geo.country,
     row.geo.region,
     row.geo.city,
@@ -225,6 +260,11 @@ function toSurveyCsvRow(row: StoredSurveyResponse): string {
 }
 
 async function saveSurveyResponse(response: StoredSurveyResponse) {
+  if (process.env.GCS_BUCKET_NAME) {
+    await saveSurveyResponseToGcs(response);
+    return;
+  }
+
   const csvPath = getSurveyCsvPath();
   await mkdir(path.dirname(csvPath), { recursive: true });
 
@@ -237,6 +277,10 @@ async function saveSurveyResponse(response: StoredSurveyResponse) {
 }
 
 async function readSurveyCsv(): Promise<string> {
+  if (process.env.GCS_BUCKET_NAME) {
+    return readSurveyCsvFromGcs();
+  }
+
   const csvPath = getSurveyCsvPath();
   return readFile(csvPath, "utf8").catch(error => {
     const typedError = error as NodeJS.ErrnoException;
@@ -261,6 +305,88 @@ function getSurveyInput(body: unknown): SurveyInput {
     q5_price: data.q5_price ?? "",
     q6_coupon_map: data.q6_coupon_map ?? "",
   };
+}
+
+function getGcsCsvObjectName() {
+  return process.env.GCS_CSV_OBJECT || "survey/survey-responses.csv";
+}
+
+function buildCsvWithHeader(row: StoredSurveyResponse) {
+  return `\uFEFF${SURVEY_CSV_HEADERS.map(toCsvCell).join(",")}\n${toSurveyCsvRow(row)}\n`;
+}
+
+async function saveSurveyResponseToGcs(response: StoredSurveyResponse) {
+  const bucketName = process.env.GCS_BUCKET_NAME;
+  if (!bucketName) {
+    throw new Error("GCS_BUCKET_NAME is not configured");
+  }
+
+  const file = storage.bucket(bucketName).file(getGcsCsvObjectName());
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const [exists] = await file.exists();
+
+    if (!exists) {
+      try {
+        await file.save(buildCsvWithHeader(response), {
+          resumable: false,
+          contentType: "text/csv; charset=utf-8",
+          preconditionOpts: {
+            ifGenerationMatch: 0,
+          },
+        });
+        return;
+      } catch (error) {
+        if (isGenerationConflict(error)) {
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    const [contents] = await file.download();
+    const [metadata] = await file.getMetadata();
+    const nextContent = `${contents.toString("utf8")}${toSurveyCsvRow(response)}\n`;
+
+    try {
+      await file.save(nextContent, {
+        resumable: false,
+        contentType: "text/csv; charset=utf-8",
+        preconditionOpts: {
+          ifGenerationMatch: Number(metadata.generation),
+        },
+      });
+      return;
+    } catch (error) {
+      if (isGenerationConflict(error)) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error("Failed to update survey CSV in GCS after retries");
+}
+
+async function readSurveyCsvFromGcs() {
+  const bucketName = process.env.GCS_BUCKET_NAME;
+  if (!bucketName) {
+    throw new Error("GCS_BUCKET_NAME is not configured");
+  }
+
+  const file = storage.bucket(bucketName).file(getGcsCsvObjectName());
+  const [exists] = await file.exists();
+  if (!exists) {
+    return `\uFEFF${SURVEY_CSV_HEADERS.map(toCsvCell).join(",")}\n`;
+  }
+
+  const [contents] = await file.download();
+  return contents.toString("utf8");
+}
+
+function isGenerationConflict(error: unknown) {
+  const statusCode = (error as { code?: number })?.code;
+  return statusCode === 409 || statusCode === 412;
 }
 
 function getExportToken(req: RequestLike): string | null {
@@ -298,8 +424,13 @@ async function persistToGoogleForms(data: SurveyInput) {
   }
 }
 
-async function persistToEmail(data: SurveyInput, timestamp: string, geo: StoredSurveyResponse["geo"]) {
-  const emailText = buildSurveyEmailText(data, timestamp, geo);
+async function persistToEmail(
+  data: SurveyInput,
+  timestamp: string,
+  clientIp: string | null,
+  geo: StoredSurveyResponse["geo"]
+) {
+  const emailText = buildSurveyEmailText(data, timestamp, clientIp, geo);
 
   console.log("=== NEW SURVEY RESPONSE ===");
   console.log(emailText);
@@ -347,13 +478,14 @@ export async function surveyHandler(req: RequestLike, res: ResponseLike) {
   const storedResponse: StoredSurveyResponse = {
     id: randomUUID(),
     submittedAt: new Date().toISOString(),
+    clientIp: getClientIp(req),
     ...data,
     geo,
   };
 
   await Promise.allSettled([
     persistToGoogleForms(data),
-    persistToEmail(data, timestamp, geo),
+    persistToEmail(data, timestamp, storedResponse.clientIp, geo),
     saveSurveyResponse(storedResponse),
   ]).then(results => {
     results.forEach(result => {

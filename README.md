@@ -40,3 +40,14 @@ If you prefer Gmail SMTP instead of Resend, set:
 - `GET /app-config.js`: runtime config for client-side OAuth settings
 - `POST /api/survey`: survey submission endpoint
 - `POST /api/trpc/*`: tRPC API
+
+## Survey CSV storage
+
+Set these environment variables to persist survey responses to Google Cloud Storage as CSV:
+
+```bash
+GCS_BUCKET_NAME=YOUR_BUCKET_NAME
+GCS_CSV_OBJECT=survey/survey-responses.csv
+```
+
+Stored CSV columns include survey answers, `clientIp`, and any geo headers available on the incoming request.
