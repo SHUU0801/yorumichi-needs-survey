@@ -6,7 +6,9 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
+import { renderRuntimeConfigScript } from "./runtimeConfig";
+import { serveStatic } from "./static";
+import { registerSurveyRoutes } from "../surveyHandlers";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -35,6 +37,14 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  registerSurveyRoutes(app);
+  app.get("/healthz", (_req, res) => {
+    res.status(200).json({ ok: true });
+  });
+  app.get("/app-config.js", (_req, res) => {
+    res.type("application/javascript");
+    res.send(renderRuntimeConfigScript());
+  });
   // tRPC API
   app.use(
     "/api/trpc",
@@ -45,13 +55,17 @@ async function startServer() {
   );
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
+    const { setupVite } = await import("./vite");
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
+  const port =
+    process.env.NODE_ENV === "production"
+      ? preferredPort
+      : await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
